@@ -1,10 +1,29 @@
-export default function TableList({handleOpen}) {
-  const clients = [
-    {id: 1, name: "Hasitha Pramuditha", email:"hasithapramuditha@gmail.com", job:"Software Engineer", rate: "700", isactive: true},
-    {id: 2,name: "Hasitha Pramuditha 1", email:"hasithapramuditha@gmail.com", job:"Software Engineer", rate: "700", isactive: true},
-    {id: 3,name: "Hasitha Pramuditha 2", email:"hasithapramuditha@gmail.com", job:"Software Engineer", rate: "700", isactive: false},
-    {id: 4,name: "Hasitha Pramuditha 3", email:"hasithapramuditha@gmail.com", job:"Software Engineer", rate: "700", isactive: true}
-  ];
+import axios from 'axios';
+import { useState,useEffect} from 'react';
+
+
+export default function TableList({handleOpen, searchTerm}) {
+  const [tableData, setTableData] = useState([]);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get('http://localhost:3000/api/clients');
+        setTableData(response.data);
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const filteredData = tableData.filter(client => {
+    return client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           client.job.toLowerCase().includes(searchTerm.toLowerCase());
+  });
+  
   return(
     <>
       <div className="overflow-x-auto mt-10">
@@ -23,7 +42,7 @@ export default function TableList({handleOpen}) {
         </thead>
         <tbody className="hover:bg-base-300">
           {/* row */}
-          {clients.map((client) => (
+          {filteredData.map((client) => (
             <tr>
               <th>{client.id}</th>
               <td>{client.name}</td>
