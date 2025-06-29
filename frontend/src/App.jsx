@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import './App.css'
 import ModalForm from './components/ModalForm'
 import NavBar from './components/NavBar'
@@ -10,6 +10,20 @@ function App() {
   const [modalMode, setModalMode] = useState('add');
   const [searchTerm, setSearchTerm] = useState('');
   const [clientData, setClientData] = useState(null);
+  const [tableData, setTableData] = useState([]);
+
+  const fetchData = async () => {
+      try {
+        const response = await axios.get('http://localhost:3000/api/clients');
+        setTableData(response.data);
+      } catch (err) {
+        setError(err.message);
+      }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const handleOpen = (mode,client) => {
     setClientData(client);
@@ -21,27 +35,30 @@ function App() {
       try{
         const response = await axios.post('http://localhost:3000/api/clients',newClientData);
         console.log('Client added:', response.data);
+        setTableData((prevData) => [...prevData, response.data]);
       }catch(error) {
         console.error('Error adding client:', error);
       }
       console.log('Adding new item');
-    } else if (modalMode === 'edit') {
+    } else{
       try{
         const response = await axios.put(`http://localhost:3000/api/clients/${clientData.id}`, newClientData);
         console.log('Client updated:', response.data);
+        setTableData((prevData) => 
+          prevData.map(client => client.id === clientData.id ? response.data : client)
+        );
       }catch(error) {
         console.error('Error updating client:', error);
       }
       console.log('Editing existing item');
-    }else if (modalMode === 'delete') {
-      console.log('Deleting item');
     }
 
   }
   return (
     <>
       <NavBar onOpen = {() => handleOpen('add') } onSearch = {setSearchTerm} />
-      <TableList handleOpen={handleOpen} searchTerm= {searchTerm}/>
+      <TableList setTableData={setTableData} tableData={tableData}
+      handleOpen={handleOpen} searchTerm= {searchTerm}/>
       <ModalForm onSubmit={handleSubmit} isOpen={isOpen} onClose={() => setIsOpen(false)}
         mode={modalMode} clientData={clientData} />
     </>

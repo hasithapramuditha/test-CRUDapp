@@ -1,22 +1,9 @@
 import axios from 'axios';
-import { useState,useEffect} from 'react';
+import { useState} from 'react';
 
 
-export default function TableList({handleOpen, searchTerm}) {
-  const [tableData, setTableData] = useState([]);
+export default function TableList({handleOpen,setTableData, tableData, searchTerm}) {
   const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get('http://localhost:3000/api/clients');
-        setTableData(response.data);
-      } catch (err) {
-        setError(err.message);
-      }
-    };
-    fetchData();
-  }, []);
 
   const filteredData = tableData.filter(client => {
     return client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
