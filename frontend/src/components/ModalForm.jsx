@@ -1,11 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-export default function ModalForm({isOpen, onClose, mode,onSubmit})  {
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onClose();
-  }
+export default function ModalForm({isOpen, onClose, mode,onSubmit , clientData}) { 
   const [rate,setRate]= useState('');
   const [name,setName]= useState('');
   const [job,setJob]= useState('');
@@ -16,6 +11,41 @@ export default function ModalForm({isOpen, onClose, mode,onSubmit})  {
     setStatus(e.target.value == 'Active');
 
   }
+  const handleSubmit = async(e) => {
+    e.preventDefault();
+    try {
+      const clientData = {
+                            name,
+                            email,
+                            job,
+                            rate: Number(rate),
+                            isactive: status
+                          };
+      await onSubmit(clientData )
+      onClose();
+    }catch (error) {
+      console.error('Error adding client', error);
+    }
+    onClose();
+  }
+
+  useEffect(() => {
+    if (mode === 'edit' && clientData) {
+      setName(clientData.name || '');
+      setEmail(clientData.email || '');
+      setJob(clientData.job || '');
+      setRate(clientData.rate || '');
+      setStatus(clientData.isactive || false);
+    } else {
+      setName('');
+      setEmail('');       
+      setJob('');
+      setRate('');
+      setStatus(false);
+    }
+  }, [mode, clientData]);
+
+
   return(
     <> 
       {/* You can open the modal using document.getElementById('ID').showModal() method */}

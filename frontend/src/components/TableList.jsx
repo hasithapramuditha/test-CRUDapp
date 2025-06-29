@@ -23,6 +23,18 @@ export default function TableList({handleOpen, searchTerm}) {
            client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
            client.job.toLowerCase().includes(searchTerm.toLowerCase());
   });
+
+  const handleDelete = async (id) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this client?");
+    if (confirmDelete) {
+      try {
+        await axios.delete(`http://localhost:3000/api/clients/${id}`);
+        setTableData(tableData.filter(client => client.id !== id));
+      } catch (err) {
+        setError(err.message);
+      }
+    }
+  };
   
   return(
     <>
@@ -43,7 +55,7 @@ export default function TableList({handleOpen, searchTerm}) {
         <tbody className="hover:bg-base-300">
           {/* row */}
           {filteredData.map((client) => (
-            <tr>
+            <tr key={client.id}>
               <th>{client.id}</th>
               <td>{client.name}</td>
               <td>{client.email}</td>
@@ -55,10 +67,10 @@ export default function TableList({handleOpen, searchTerm}) {
                   </button>
               </td>
               <td>
-                <button onClick={() => handleOpen('edit')} className="btn btn-sm btn-secondary">Update</button>
+                <button onClick={() => handleOpen('edit',client)} className="btn btn-sm btn-secondary">Update</button>
               </td>
               <td>
-                <button onClick={() => handleOpen('delete')} className="btn btn-sm btn-error">Delete</button>
+                <button onClick={() => handleDelete(client.id)} className="btn btn-sm btn-error">Delete</button>
               </td>
             </tr>
           ))}
